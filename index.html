@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jane Eyre</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Georgia, serif;
+      background-color: #f5f2eb;
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #5a3e2b;
+    }
+    .grid-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .grid-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 3px 12px rgba(90, 62, 43, 0.15);
+    }
+    .card h2 {
+      border-bottom: 2px solid #d8c7b8;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      color: #6b4b35;
+    }
+    .center-node {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .center-node img {
+      width: 130px;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #8b5a42;
+      margin-bottom: 8px;
+    }
+    .center-name {
+      display: inline-block;
+      background: #8b5a42;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .relation-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      padding-left: 10px;
+      border-left: 2px solid #b8a394;
+    }
+    .relation-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #c9b8a9;
+    }
+    .role-info .role-name {
+      font-weight: bold;
+      color: #704c38;
+      font-size: 16px;
+    }
+    .role-info .desc {
+      font-size: 14px;
+      color: #444;
+      margin-top: 3px;
+    }
+    .plot-item {
+      margin-bottom: 18px;
+    }
+    .plot-title {
+      font-weight: bold;
+      color: #704c38;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jane Eyre</h1>
+    <div class="grid-wrap">
+      <div class="card">
+        <h2>人物关系图谱</h2>
+        <div class="center-node">
+          <img src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/03011040403440389001210020840311~tplv-a9rns2rl98-image.image" alt="简爱">
+          <div class="center-name">Jane Eyre 简·爱</div>
+        </div>
+
+        <div class="relation-item">
+          <img src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/12310013043441388031300200140083~tplv-a9rns2rl98-image.image" alt="里德太太">
+          <div class="role-info">
+            <div class="role-name">Mrs. Reed 里德太太｜舅母</div>
+            <div class="desc">冷酷刻薄，幼年虐待简爱，将她送往洛伍德学校。</div>
+          </div>
+        </div>
+
+        <div class="relation-item">
+          <img src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/23011041043440388001310200240322~tplv-a9rns2rl98-image.image" alt="约翰·里德">
+          <div class="role-info">
+            <div class="role-name">John Reed 约翰·里德｜表兄</div>
+            <div class="desc">骄纵暴戾，长期欺负童年简·爱。</div>
+          </div>
+        </div>
+
+        <div class="relation-item">
+          <img src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/33011040043441388001300200340333~tplv-a9rns2rl98-image.image" alt="海伦·彭斯">
+          <div class="role-info">
+            <div class="role-name">Helen Burns 海伦·彭斯｜挚友...
