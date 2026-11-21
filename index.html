@@ -1,1 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>简·爱 人物关系图 | Jane Eyre Character Map</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f2eb;
+  color: #2c2c2c;
+  line-height: 1.7;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #1a1a1a;
+}
+header .sub {
+  font-size: 0.95rem;
+  color: #7a6e5d;
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+header .desc {
+  font-size: 0.9rem;
+  color: #8a7e6d;
+  margin-top: 6px;
+}
+
+.map-section {
+  background: #fffdf8;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+  text-align: center;
+}
+.map-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  color: #3d3529;
+}
+.map-hint {
+  font-size: 0.85rem;
+  color: #9a8e7d;
+  margin-bottom: 20px;
+}
+
+.legend-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #5a5040;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-line {
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+}
+.line-love { background: #c89a40; }
+.line-conflict { background: #b85c5c; }
+.line-friend { background: #448855; }
+.line-teacher { background: #336699; }
+.line-family { background: #9a7aaa; }
+.line-employ { background: #6a8aaa; }
+
+svg {
+  width: 100%;
+  height: 540px;
+  background: #fffdf8;
+  border-radius: 12px;
+  border: 1px solid #ece4d4;
+  margin-bottom: 24px;
+}
+.link {
+  stroke-width: 1.6;
+  stroke-dasharray: 6 4;
+  opacity: 0.45;
+  fill: none;
+  transition: stroke-width 0.25s ease, opacity 0.25s ease, stroke-dasharray 0.25s ease;
+}
+.link.active {
+  stroke-width: 3;
+  opacity: 1;
+  stroke-dasharray: none;
+}
+
+.node rect {
+  rx: 12px;
+  ry: 12px;
+  fill: #ffffff;
+  stroke: #d9d0c0;
+  stroke-width: 1.5px;
+  cursor: pointer;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+.node text {
+  font-size: 13px;
+  fill: #3d3529;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  font-weight: 500;
+}
+.node.active rect {
+  fill: #3d3529;
+  stroke: #3d3529;
+}
+.node.active text {
+  fill: #ffffff;
+}
+
+.key-section {
+  margin-bottom: 40px;
+}
+.key-section > p {
+  color: #886b6b;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.key-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+.rel-card {
+  background: #fff;
+  border: 1px solid #e8e2d8;
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  justify-content: space-between;
+}
+.rel-left {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.rel-tag {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.tag-love { background-color: #b85c6c; }
+.tag-conflict { background-color: #7c4b4b; }
+.tag-friend { background-color: #488c68; }
+.tag-teacher { background-color: #386899; }
+.tag-family { background-color: #8a6c99; }
+.tag-employ { background-color: #608899; }
+
+.rel-content h3 {
+  font-size: 1.05rem;
+  color: #222;
+  margin-bottom: 3px;
+}
+.rel-content .en {
+  font-size: 0.9rem;
+  color: #777;
+}
+.rel-arrow {
+  font-size: 18px;
+  color: #999;
+  transition: transform 0.3s ease;
+  margin-top: 4px;
+}
+.rel-card.open .rel-arrow {
+  transform: rotate(90deg);
+}
+.rel-full {
+  width: 100%;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  color: #5a5040;
+  font-size: 0.92rem;
+  display: none;
+}
+.rel-card.open .rel-full {
+  display: block;
+}
+
+/* ===== 结局板块 ===== */
+.ending-section {
+  background: #fffdf8;
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 40px;
+}
+.ending-eyebrow {
+  color: #884455;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.ending-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #222;
+}
+.ending-overview {
+  color: #444;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  font-size: 1.05rem;
+}
+.ending-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.ending-card {
+  background: #ffffff;
+  border: 1px solid #c7b59c;
+  border-radius: 14px;
+  padding: 20px;
+  border-left: 5px solid #993344;
+}
+.ending-card.survive {
+  border-left-color: #337755;
+}
+.ending-card h4 {
+  font-size: 1.2rem;
+  color: #222;
+  margin-bottom: 4px;
+}
+.en-name {
+  color: #777;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.quote-en {
+  font-style: italic;
+  color: #553b44;
+  font-size: 0.88rem;
+}
+.quote-cn {
+  color: #776555;
+  font-size: 0.84rem;
+}
+
+.table-section {
+  margin-bottom: 40px;
+}
+.table-section > p {
+  color: #886b6b;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.table-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #222;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #f8c8d8;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  font-size: 0.88rem;
+}
+th {
+  background: #f6b8cc;
+  color: #442233;
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 500;
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8d8e4;
+  color: #4a4030;
+}
+tr:hover td {
+  background: #fff0f5;
+}
+
+.quote-section {
+  margin-bottom: 20px;
+}
+.quote-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  color: #3d3529;
+}
+.filter-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid #e8b0c4;
+  background: #fff;
+  color: #663344;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.filter-btn.active {
+  background: #f6b8cc;
+  color: #fff;
+  border-color: #f6b8cc;
+}
+.quote-card {
+  background: #fffdf8;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  display: none;
+}
+.quote-card.show {
+  display: block;
+}
+.speaker {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #c47a5a;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.chap {
+  font-size: 0.8rem;
+  color: #a08870;
+  margin-bottom: 6px;
+}
+blockquote {
+  font-size: 0.95rem;
+  color: #3d3529;
+  font-style: italic;
+  margin-bottom: 8px;
+  padding-left: 14px;
+  border-left: 2px solid #d9d0c0;
+}
+.trans {
+  font-size: 0.88rem;
+  color: #6a6050;
+  margin-bottom: 8px;
+}
+.note {
+  font-size: 0.82rem;
+  color: #9a8e7d;
+}
+
+footer {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #b0a898;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #e5dfd5;
+}
+@media (max-width: 600px) {
+  body { padding: 24px 14px; }
+  header h1 { font-size: 1.6rem; }
+  .ending-grid {
+    grid-template-columns: 1fr;
+  }
+  table { font-size: 0.78rem; }
+  th, td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>简·爱 人物关系图</h1>
+    <div class="sub">Jane Eyre · Charlotte Brontë</div>
+    <div class="desc">完整人物关联，包含配角之间的相互关系</div>
+  </header>
+
+  <section class="map-section">
+    <h2>完整人物关系图</h2>
+    <p class="map-hint">点击人物卡片，点亮配对关系</p>
+    <div class="legend-wrap">
+      <div class="legend-item"><span class="legend-line line-love"></span>爱慕/婚恋</div>
+      <div class="legend-item"><span class="legend-line line-conflict"></span>冲突/压迫</div>
+      <div class="legend-item"><span class="legend-line line-friend"></span>挚友</div>
+      <div class="legend-item"><span class="legend-line line-teacher"></span>师生</div>
+      <div class="legend-item"><span class="legend-line line-family"></span>亲属</div>
+      <div class="legend-item"><span class="legend-line line-employ"></span>雇佣/监护</div>
+    </div>
+    <div id="graph"></div>
+  </section>
+
+  <section class="key-section">
+    <p>KEY RELATIONSHIPS</p>
+    <h2>六组关键关系逐条拆解</h2>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-love">爱慕</span>
+        <div class="rel-content">
+          <h3>简 & 罗切斯特 / Jane & Rochester</h3>
+          <div class="en">跨越阶层的灵魂之恋</div>
+          <div class="rel-full">简作为桑菲尔德的家庭教师与罗切斯特相爱，二人追求精神平等；婚礼因伯莎的存在中断，直到庄园大火之后才得以圆满。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-love">婚姻</span>
+        <div class="rel-content">
+          <h3>罗切斯特 & 伯莎 / Rochester & Bertha</h3>
+          <div class="en">被束缚的不幸婚姻</div>
+          <div class="rel-full">罗切斯特年轻时在牙买加迎娶伯莎，婚后伯莎精神失常，被长期囚禁在桑菲尔德，成为横亘在简与罗切斯特之间最大阻碍。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-conflict">压迫</span>
+        <div class="rel-content">
+          <h3>简 & 里德太太 / Jane & Mrs. Reed</h3>
+          <div class="en">童年的伤害与和解</div>
+          <div class="rel-full">简寄居于舅妈里德太太家中，长期遭受虐待；表哥约翰不断欺凌她，直至多年后简选择放下怨恨。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-friend">挚友</span>
+        <div class="rel-content">
+          <h3>简 & 海伦 / Jane & Helen</h3>
+          <div class="en">温柔的精神慰藉</div>
+          <div class="rel-full">海伦是简的挚友，以宽恕感化简；谭波儿小姐作为良师保护简，二人共同抚平简童年的创伤。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-family">亲属</span>
+        <div class="rel-content">
+          <h3>简 & 圣约翰 / Jane & St. John</h3>
+          <div class="en">表亲与无爱的求婚</div>
+          <div class="rel-full">圣约翰、黛安娜、玛丽是亲兄妹，同时也是简的表亲；圣约翰向简提出无爱的婚姻，黛安娜与玛丽则和简情投意合。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+
+    <div class="rel-card">
+      <div class="rel-left">
+        <span class="rel-tag tag-employ">雇佣监护</span>
+        <div class="rel-content">
+          <h3>罗切斯特 · 阿黛尔 · 费尔法克斯太太</h3>
+          <div class="en">桑菲尔德庄园内部关系</div>
+          <div class="rel-full">罗切斯特是阿黛尔的监护人、费尔法克斯太太的雇主；费尔法克斯太太作为管家，牵线并见证简与罗切斯特的感情。</div>
+        </div>
+      </div>
+      <span class="rel-arrow">›</span>
+    </div>
+  </section>
+
+  <!-- 结局板块 -->
+  <section class="ending-section">
+    <p class="ending-eyebrow">HOW IT ENDS</p>
+    <h2>结局：灵魂终获平等</h2>
+    <p class="ending-overview">桑菲尔德庄园大火之后，伯莎身亡；罗切斯特重伤失明。简继承遗产归来，二人终于站在同等的灵魂高度，缔结良缘。</p>
+    <div class="ending-grid">
+      <div class="ending-card survive">
+        <h4>简·爱</h4>
+        <div class="en-name">Jane Eyre</div>
+        <p>拒绝圣约翰无爱的婚姻，重返罗切斯特身边，最终与他成婚，实现灵魂平等。
+        <br><br>
+        <span class="quote-en">"I am no bird; and no net ensnares me: I am a free human being with an independent will."</span>
+        <br>
+        <span class="quote-cn">“我不是鸟，也没有罗网能困住我；我是拥有独立意志的自由人。”</span>
+        </p>
+      </div>
+      <div class="ending-card survive">
+        <h4>罗切斯特</h4>
+        <div class="en-name">Edward Rochester</div>
+        <p>大火中营救他人，失去视力与一只手，褪去傲慢，最终与简结合。
+        <br><br>
+        <span class="quote-en">"My bride is here, because my equal is here, and my likeness."</span>
+        <br>
+        <span class="quote-cn">“我的新娘在这里，因为我的平等者在这里，我的同类在这里。”</span>
+        </p>
+      </div>
+      <div class="ending-card">
+        <h4>伯莎·梅森</h4>
+        <div class="en-name">Bertha Mason</div>
+        <p>纵火焚毁桑菲尔德庄园，于火灾中坠楼身亡。
+        <br><br>
+        <span class="quote-en">[原著无直接完整台词]</span>
+        <br>
+        <span class="quote-cn">“她毁灭了庄园，也挣脱了枷锁。”</span>
+        </p>
+      </div>
+      <div class="ending-card">
+        <h4>里德太太</h4>
+        <div class="en-name">Mrs. Reed</div>
+        <p>临终前向简坦白叔父来信的秘密，二人达成迟来的和解。
+        <br><br>
+        <span class="quote-en">"I could not love her."</span>
+        <br>
+        <span class="quote-cn">“我始终无法爱她。”</span>
+        </p>
+      </div>
+      <div class="ending-card">
+        <h4>海伦·彭斯</h4>
+        <div class="en-name">Helen Burns</div>
+        <p>洛伍德学校期间病逝，她的宽恕理念永久影响简。
+        <br><br>
+        <span class="quote-en">"Life appears to me too short to be spent in nursing animosity or registering wrongs."</span>
+        <br>
+        <span class="quote-cn">“生命对我来说太短暂了，不能用来怀恨记仇。”</span>
+        </p>
+      </div>
+      <div class="ending-card survive">
+        <h4>圣约翰</h4>
+        <div class="en-name">St. John Rivers</div>
+        <p>求婚被简拒绝，坚守信仰远赴印度传教。
+        <br><br>
+        <span class="quote-en">"God and nature intended you for a missionary’s wife."</span>
+        <br>
+        <span class="quote-cn">“上帝和自然注定你要做传教士的妻子。”</span>
+        </p>
+      </div>
+      <div class="ending-card survive">
+        <h4>黛安娜 & 玛丽</h4>
+        <div class="en-name">Diana & Mary Rivers</div>
+        <p>与简情同姐妹，各自拥有安稳幸福的生活。
+        <br><br>
+        <span class="quote-en">"We are sisters now."</span>
+        <br>
+        <span class="quote-cn">“如今我们就是姐妹。”</span>
+        </p>
+      </div>
+      <div class="ending-card survive">
+        <h4>费尔法克斯太太</h4>
+        <div class="en-name">Mrs. Fairfax</div>
+        <p>平安度过灾祸，由衷祝福简与罗切斯特。
+        <br><br>
+        <span class="quote-en">"I never expected this."</span>
+        <br>
+        <span class="quote-cn">“我从未料到会是这般结局。”</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <p>QUICK REFERENCE</p>
+    <h2>人物身份速查表</h2>
+    <table>
+      <thead>
+        <tr><th>人物</th><th>身份</th><th>关键关系</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>简·爱</td><td>孤儿、家庭教师</td><td>罗切斯特爱人；海伦挚友；圣约翰表妹</td></tr>
+        <tr><td>罗切斯特</td><td>桑菲尔德庄园主</td><td>伯莎丈夫；阿黛尔监护人；费尔法克斯太太雇主</td></tr>
+        <tr><td>伯莎·梅森</td><td>罗切斯特原配妻子</td><td>被囚禁于桑菲尔德，纵火毁灭庄园</td></tr>
+        <tr><td>里德太太</td><td>简的舅妈</td><td>简童年监护人，长期虐待简</td></tr>
+        <tr><td>海伦·彭斯</td><td>洛伍德学生</td><td>简的挚友，温和隐忍</td></tr>
+        <tr><td>谭波儿小姐</td><td>洛伍德教师</td><td>简的良师，公正善良</td></tr>
+        <tr><td>圣约翰</td><td>传教士</td><td>黛安娜、玛丽兄长，简的表兄</td></tr>
+        <tr><td>黛安娜 & 玛丽</td><td>乡村教师</td><td>圣约翰妹妹，简的表姐</td></tr>
+        <tr><td>费尔法克斯太太</td><td>桑菲尔德管家</td><td>罗切斯特雇员，善待简</td></tr>
+        <tr><td>阿黛尔</td><td>罗切斯特养女</td><td>简的学生，活泼天真</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="quote-section">
+    <h2>经典台词</h2>
+    <div class="filter-btn-group">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="jane">简</button>
+      <button class="filter-btn" data-filter="rochester">罗切斯特</button>
+      <button class="filter-btn" data-filter="helen">海伦</button>
+      <button class="filter-btn" data-filter="bertha">伯莎</button>
+      <button class="filter-btn" data-filter="stjohn">圣约翰</button>
+    </div>
+    <div class="quote-card show" data-person="jane">
+      <div class="speaker">简·爱 Jane Eyre</div>
+      <div class="chap">Chapter 23</div>
+      <blockquote>“Do you think I am an automaton? — a machine without feelings? … Do you think, because I am poor, obscure, plain, and little, I am soulless and heartless? You think wrong! — I have as much soul as you, — and full as much heart!”</blockquote>
+      <p class="trans">“你以为我是一架自动机器么？一架没有感情的机器么？……你以为，因为我穷、低微、不美、矮小，我就没有灵魂没有心了么？你想错了！——我的灵魂和你一样，我的心也完全跟你一样！”</p>
+      <p class="note">简宣告灵魂平等，拒绝依附于对方。</p>
+    </div>
+    <div class="quote-card show" data-person="jane">
+      <div class="speaker">简·爱 Jane Eyre</div>
+      <div class="chap">Chapter 23</div>
+      <blockquote>“I am no bird; and no net ensnares me: I am a free human being with an independent will.”</blockquote>
+      <p class="trans">“我不是鸟，也没有罗网能困住我；我是拥有独立意志的自由人。”</p>
+      <p class="note">简坚定申明自身的独立人格。</p>
+    </div>
+    <div class="quote-card show" data-person="rochester">
+      <div class="speaker">罗切斯特 Rochester</div>
+      <div class="chap">Chapter 38</div>
+      <blockquote>“My bride is here, because my equal is here, and my likeness.”</blockquote>
+      <p class="trans">“我的新娘在这里，因为我的平等者在这里，我的同类在这里。”</p>
+      <p class="note">罗切斯特终于承认简与自己地位对等。</p>
+    </div>
+    <div class="quote-card show" data-person="helen">
+      <div class="speaker">海伦·彭斯 Helen Burns</div>
+      <div class="chap">Chapter 6</div>
+      <blockquote>“Life appears to me too short to be spent in nursing animosity or registering wrongs.”</blockquote>
+      <p class="trans">“生命对我来说太短暂了，不能用来怀恨记仇。”</p>
+      <p class="note">海伦传递宽恕的信念，深刻影响简。</p>
+    </div>
+    <div class="quote-card show" data-person="stjohn">
+      <div class="speaker">圣约翰 St. John</div>
+      <div class="chap">Chapter 34</div>
+      <blockquote>“God and nature intended you for a missionary’s wife.”</blockquote>
+      <p class="trans">“上帝和自然注定你要做传教士的妻子。”</p>
+      <p class="note">他将婚姻视作完成宗教使命的工具。</p>
+    </div>
+  </section>
+
+  <footer>基于夏洛蒂·勃朗特《简·爱》通行文本整理</footer>
+</div>
+
+<script>
+const nodes = [
+  { id: "Jane", name: "简·爱", w:110, h:40 },
+  { id: "Rochester", name: "罗切斯特", w:125, h:40 },
+  { id: "Bertha", name: "伯莎", w:105, h:40 },
+  { id: "MrsReed", name: "里德太太", w:120, h:40 },
+  { id: "Helen", name: "海伦", w:105, h:40 },
+  { id: "MissTemple", name: "谭波儿小姐", w:135, h:40 },
+  { id: "StJohn", name: "圣约翰", w:115, h:40 },
+  { id: "DianaMary", name: "黛安娜&玛丽", w:140, h:40 },
+  { id: "Fairfax", name: "费尔法克斯太太", w:145, h:40 },
+  { id: "Adele", name: "阿黛尔", w:100, h:40 }
+];
+const links = [
+  { source:"Jane", target:"Rochester", color:"#c89a40" },
+  { source:"Rochester", target:"Bertha", color:"#c89a40" },
+  { source:"Jane", target:"MrsReed", color:"#b85c5c" },
+  { source:"Jane", target:"Helen", color:"#448855" },
+  { source:"Jane", target:"MissTemple", color:"#336699" },
+  { source:"Jane", target:"StJohn", color:"#9a7aaa" },
+  { source:"StJohn", target:"DianaMary", color:"#9a7aaa" },
+  { source:"Rochester", target:"Adele", color:"#6a8aaa" },
+  { source:"Rochester", target:"Fairfax", color:"#6a8aaa" },
+  { source:"Fairfax", target:"Jane", color:"#6a8aaa" }
+];
+
+const width = document.querySelector("#graph").clientWidth;
+const height = 540;
+const svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
+const simulation = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d=>d.id).distance(160))
+  .force("charge", d3.forceManyBody().strength(-420))
+  .force("center", d3.forceCenter(width/2, height/2));
+
+const link = svg.append("g")
+  .selectAll("path")
+  .data(links)
+  .enter().append("path")
+  .classed("link", true)
+  .style("stroke", d=>d.color)
+  .attr("fill", "none");
+
+const nodeG = svg.append("g")
+  .selectAll("g")
+  .data(nodes)
+  .enter().append("g")
+  .classed("node", true)
+  .call(d3.drag()
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended));
+
+nodeG.append("rect")
+  .attr("x", d=> -d.w/2)
+  .attr("y", d=> -d.h/2)
+  .attr("width", d=>d.w)
+  .attr("height", d=>d.h)
+  .attr("rx",12).attr("ry",12);
+nodeG.append("text").attr("dy",4).text(d=>d.name);
+
+nodeG.on("click", function(e, dClick){
+  e.stopPropagation();
+  const selectedId = dClick.id;
+  const relatedIds = new Set([selectedId]);
+
+  links.forEach(l => {
+    if(l.source.id === selectedId) relatedIds.add(l.target.id);
+    if(l.target.id === selectedId) relatedIds.add(l.source.id);
+  })
+
+  link.classed("active", l =>
+    l.source.id === selectedId || l.target.id === selectedId
+  );
+  nodeG.classed("active", nd => relatedIds.has(nd.id));
+});
+
+svg.on("click", ()=>{
+  nodeG.classed("active", false);
+  link.classed("active", false);
+});
+
+simulation.on("tick", ()=>{
+  link.attr("d", d => {
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    const midX = (d.source.x + d.target.x) / 2;
+    const midY = (d.source.y + d.target.y) / 2;
+    const cx = midX - dy * 0.18;
+    const cy = midY + dx * 0.18;
+    return `M ${d.source.x} ${d.source.y} Q ${cx} ${cy} ${d.target.x} ${d.target.y}`;
+  });
+
+  nodeG.attr("transform", d=>`translate(${d.x},${d.y})`);
+});
+
+function dragstarted(e,d){ if(!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; }
+function dragged(e,d){ d.fx=e.x; d.fy=e.y; }
+function dragended(e,d){ if(!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }
+
+document.querySelectorAll(".rel-card").forEach(card=>{
+  card.onclick = ()=> card.classList.toggle("open");
+});
+
+const quoteCards = document.querySelectorAll(".quote-card");
+const filterBtns = document.querySelectorAll(".filter-btn");
+filterBtns.forEach(btn=>{
+  btn.onclick = ()=>{
+    const key = btn.dataset.filter;
+    filterBtns.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    quoteCards.forEach(card=>{
+      if(key === "all" || card.dataset.person === key) card.classList.add("show");
+      else card.classList.remove("show");
+    })
+  }
+})
+</script>
+</body>
+</html>
